@@ -1,7 +1,6 @@
 ﻿using GoldbergGUI.Core.Models;
 using GoldbergGUI.Core.Services;
 using GoldbergGUI.Core.Utils;
-using Microsoft.Win32;
 using MvvmCross.Commands;
 using MvvmCross.Logging;
 using MvvmCross.Navigation;
@@ -16,7 +15,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using System.Windows;
+
 
 namespace GoldbergGUI.Core.ViewModels
 {
