@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<FileVersion>0.3.0</FileVersion>
+		<Company>Jeddunk</Company>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AngleSharp" Version="0.14.0" />
+		<PackageReference Include="MvvmCross" Version="7.1.2" />
+		<PackageReference Include="NinjaNye.SearchExtensions" Version="3.0.1" />
+		<PackageReference Include="SharpCompress" Version="0.35.0" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.7.335" />
+		<PackageReference Include="SteamStorefrontAPI" Version="2.0.1.421" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="PresentationCore, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+			<HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_32\PresentationCore\v4.0_4.0.0.0__31bf3856ad364e35\PresentationCore.dll</HintPath>
+		</Reference>
+		<Reference Include="PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+			<HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\PresentationFramework\v4.0_4.0.0.0__31bf3856ad364e35\PresentationFramework.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+</Project>
