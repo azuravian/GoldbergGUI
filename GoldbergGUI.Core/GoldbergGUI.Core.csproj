@@ -1,16 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<FileVersion>0.3.0</FileVersion>
+		<UseWPF>true</UseWPF>
 		<Company>Jeddunk</Company>
 		<Platforms>AnyCPU;x86;x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
+	    <WrapperTool>tlbimp</WrapperTool>
+	    <VersionMinor>4</VersionMinor>
+	    <VersionMajor>2</VersionMajor>
+	    <Guid>215d64d2-031c-33c7-96e3-61794cd1ee61</Guid>
+	  </COMReference>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="AngleSharp" Version="0.14.0" />
 		<PackageReference Include="MvvmCross" Version="7.1.2" />
-		<PackageReference Include="NinjaNye.SearchExtensions" Version="3.0.1" />
+		<PackageReference Include="NinjaNye.SearchExtensions" Version="4.0.1" />
 		<PackageReference Include="SharpCompress" Version="0.35.0" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.7.335" />
 		<PackageReference Include="SteamStorefrontAPI" Version="2.0.1.421" />
