@@ -35,6 +35,8 @@ namespace GoldbergGUI.Core.ViewModels
         private ObservableCollection<DlcApp> _dlcs;
         private string _accountName;
         private long _steamId;
+        private bool _experimental;
+        private bool _experimentalnow;
         private bool _offline;
         private bool _disableNetworking;
         private bool _disableOverlay;
@@ -62,6 +64,9 @@ namespace GoldbergGUI.Core.ViewModels
 
         public override void Prepare()
         {
+#if DEBUG
+            if(!Debugger.IsAttached) Debugger.Launch();
+#endif
             base.Prepare();
             Task.Run(async () =>
             {
@@ -73,17 +78,19 @@ namespace GoldbergGUI.Core.ViewModels
                     SteamLanguages = new ObservableCollection<string>(_goldberg.Languages());
                     ResetForm();
                     await _steam.Initialize(_logProvider.GetLogFor<SteamService>()).ConfigureAwait(false);
+                    await _goldberg.Initialize(_logProvider.GetLogFor<GoldbergService>()).ConfigureAwait(false);
                     var globalConfiguration =
-                        await _goldberg.Initialize(_logProvider.GetLogFor<GoldbergService>()).ConfigureAwait(false);
+                        await _goldberg.GetGlobalSettings().ConfigureAwait(false);
                     AccountName = globalConfiguration.AccountName;
                     SteamId = globalConfiguration.UserSteamId;
                     SelectedLanguage = globalConfiguration.Language;
+                    Experimental = globalConfiguration.Experimental;
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                     _log.Error(e.Message);
-                    throw;
+                    //throw;
                 }
 
                 MainWindowEnabled = true;
@@ -171,6 +178,26 @@ namespace GoldbergGUI.Core.ViewModels
             {
                 _steamId = value;
                 RaisePropertyChanged(() => SteamId);
+            }
+        }
+
+        public bool Experimental
+        {
+            get => _experimental;
+            set
+            {
+                _experimental = value;
+                RaisePropertyChanged(() => Experimental);
+            }
+        }
+
+        public bool ExperimentalNow
+        {
+            get => _experimentalnow;
+            set
+            {
+                _experimentalnow = value;
+                RaisePropertyChanged(() => ExperimentalNow);
             }
         }
 
@@ -443,7 +470,8 @@ namespace GoldbergGUI.Core.ViewModels
             {
                 AccountName = AccountName,
                 UserSteamId = SteamId,
-                Language = SelectedLanguage
+                Language = SelectedLanguage,
+                Experimental = Experimental
             };
             await _goldberg.SetGlobalSettings(globalConfiguration).ConfigureAwait(false);
             if (!DllSelected) return;
@@ -458,6 +486,7 @@ namespace GoldbergGUI.Core.ViewModels
                 Achievements = Achievements.ToList(),
                 DlcList = DLCs.ToList(),
                 Offline = Offline,
+                ExperimentalNow = ExperimentalNow,
                 DisableNetworking = DisableNetworking,
                 DisableOverlay = DisableOverlay
             }
@@ -475,6 +504,7 @@ namespace GoldbergGUI.Core.ViewModels
             AccountName = globalConfiguration.AccountName;
             SteamId = globalConfiguration.UserSteamId;
             SelectedLanguage = globalConfiguration.Language;
+            Experimental = globalConfiguration.Experimental;
             if (!DllSelected) return;
 
             _log.Info("Reset form...");
@@ -570,6 +600,7 @@ namespace GoldbergGUI.Core.ViewModels
             DLCs = new ObservableCollection<DlcApp>();
             AccountName = "Account name...";
             SteamId = -1;
+            Experimental = false;
             Offline = false;
             DisableNetworking = false;
             DisableOverlay = false;
@@ -589,6 +620,7 @@ namespace GoldbergGUI.Core.ViewModels
             AppId = config.AppId;
             Achievements = new ObservableCollection<Achievement>(config.Achievements);
             DLCs = new ObservableCollection<DlcApp>(config.DlcList);
+            ExperimentalNow = config.ExperimentalNow;
             Offline = config.Offline;
             DisableNetworking = config.DisableNetworking;
             DisableOverlay = config.DisableOverlay;

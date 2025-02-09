@@ -97,6 +97,7 @@
                             <TabItem Header="Misc" IsEnabled="{Binding DllSelected, UpdateSourceTrigger=PropertyChanged}">
                                 <StackPanel Margin="10,10,10,10">
                                     <Button Content="_Generate steam__interfaces.txt" IsEnabled="{Binding SteamInterfacesTxtExists, UpdateSourceTrigger=PropertyChanged}" Command="{Binding GenerateSteamInterfacesCommand}" Height="20" Margin="0,0,0,5" />
+                                    <CheckBox Content="Use Experimental (See Global Settings tab for permanent changes)" IsChecked="{Binding ExperimentalNow}" Height="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                                     <CheckBox Content="Offline" IsChecked="{Binding Offline, Mode=TwoWay}" Height="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                                     <CheckBox Content="Disable Networking" IsChecked="{Binding DisableNetworking, Mode=TwoWay}" Height="20" VerticalContentAlignment="Center"/>
                                     <CheckBox Content="Disable Overlay" IsChecked="{Binding DisableOverlay, Mode=TwoWay}" Height="20" VerticalContentAlignment="Center" IsEnabled="False"/>
@@ -147,6 +148,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
@@ -176,16 +178,25 @@
                             <!--
                                       IsEnabled="{Binding DllSelected, UpdateSourceTrigger=PropertyChanged}"/>
                                       -->
-                            <Label Content="Custom Broadcast Addresses:" HorizontalAlignment="Left"
-                                    Grid.ColumnSpan="2" Grid.Row="3" Grid.Column="0" Margin="0,0,10,0"/>
+                            <Label Content="Use Experimental Goldberg" HorizontalAlignment="Left" Grid.Row="3"
+                                Grid.Column="0" Margin="0,0,10,0" />
+                            <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding Experimental}" VerticalAlignment="Center"/>
                             <CheckBox Content="Global" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Right" 
                                       Margin="10,0,5,0" VerticalAlignment="Center" IsChecked="True" 
                                       IsEnabled="False"/>
-                            <TextBox Grid.Row="4" Grid.ColumnSpan="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                            <!--
+                                      IsEnabled="{Binding DllSelected, UpdateSourceTrigger=PropertyChanged}"/>
+                                      -->
+                            <Label Content="Custom Broadcast Addresses:" HorizontalAlignment="Left"
+                                    Grid.ColumnSpan="2" Grid.Row="4" Grid.Column="0" Margin="0,0,10,0"/>
+                            <CheckBox Content="Global" Grid.Row="4" Grid.Column="2" HorizontalAlignment="Right" 
+                                      Margin="10,0,5,0" VerticalAlignment="Center" IsChecked="True" 
+                                      IsEnabled="False"/>
+                            <TextBox Grid.Row="5" Grid.ColumnSpan="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                       TextWrapping="Wrap"
                                       AcceptsReturn="True"
                                       VerticalScrollBarVisibility="Auto" MaxHeight="120" MinHeight="120"/>
-                            <TextBlock TextWrapping="Wrap" Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="5" Margin="5,10,5,5">
+                            <TextBlock TextWrapping="Wrap" Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="6" Margin="5,10,5,5">
                                 <Run Text="{Binding G.Header, Mode=OneTime}" FontWeight="Bold"/><!--
                                 --><Run Text="{Binding G.TextPreLink, Mode=OneTime}"/>
                                 <Hyperlink Command="{Binding OpenGlobalSettingsFolderCommand}"><Run 

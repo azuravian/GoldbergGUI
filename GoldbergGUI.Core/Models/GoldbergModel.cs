@@ -21,6 +21,10 @@ namespace GoldbergGUI.Core.Models
         /// </summary>
         public string Language { get; set; }
         /// <summary>
+        /// Use the experimental client
+        /// </summary>
+        public bool Experimental { get; set; }
+        /// <summary>
         /// Custom broadcast addresses (IPv4 or domain addresses)
         /// </summary>
         public List<string> CustomBroadcastIps { get; set; }
@@ -51,6 +55,10 @@ namespace GoldbergGUI.Core.Models
         public List<Stat> Stats { get; set; }
 
         // Add controller setting here!
+        /// <summary>
+        /// Set experimental.
+        /// </summary>
+        public bool ExperimentalNow { get; set; }
         /// <summary>
         /// Set offline mode.
         /// </summary>
