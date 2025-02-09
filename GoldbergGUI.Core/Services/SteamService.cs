@@ -45,6 +45,22 @@ namespace GoldbergGUI.Core.Services
     // ReSharper disable once ClassNeverInstantiated.Global
     public class SteamService : ISteamService
     {
+        private static string Key()
+        {
+            string apiKey = "";
+            string _keyPath = Path.Combine(Directory.GetCurrentDirectory(), "key");
+            if (File.Exists(_keyPath))
+            {
+                return File.ReadAllText(_keyPath);
+            }
+            else
+            {
+                apiKey = Secrets.SteamWebApiKey();
+                File.WriteAllText(_keyPath, apiKey);
+                return apiKey;
+            }
+            
+        } 
         // ReSharper disable StringLiteralTypo
         private readonly Dictionary<string, SteamCache> _caches =
             new Dictionary<string, SteamCache>
@@ -55,7 +71,7 @@ namespace GoldbergGUI.Core.Services
                         "https://api.steampowered.com/IStoreService/GetAppList/v1/" +
                         "?max_results=50000" +
                         "&include_games=1" +
-                        "&key=" + Secrets.SteamWebApiKey(),
+                        "&key=" + Key(),
                         typeof(SteamAppsV1),
                         AppTypeGame
                     )
@@ -67,7 +83,7 @@ namespace GoldbergGUI.Core.Services
                         "?max_results=50000" +
                         "&include_games=0" +
                         "&include_dlc=1" +
-                        "&key=" + Secrets.SteamWebApiKey(),
+                        "&key=" + Key(),
                         typeof(SteamAppsV1),
                         AppTypeDlc
                     )
@@ -182,7 +198,7 @@ namespace GoldbergGUI.Core.Services
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
-            var apiUrl = $"{GameSchemaUrl}?key={Secrets.SteamWebApiKey()}&appid={steamApp.AppId}&l=en";
+            var apiUrl = $"{GameSchemaUrl}?key={Key()}&appid={steamApp.AppId}&l=en";
 
             var response = await client.GetAsync(apiUrl);
             var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
