@@ -12,7 +12,7 @@ Set up any game with Goldberg's emulator easily and automatically.
 ## Usage
 
 * Double-click `GoldbergGUI.WPF.exe` to open the application.  
-  _(When starting it for the first time, it might take a few seconds since it needs to
+  _(When starting it for the first time, it might take a minute or two since it needs to
   cache a list of games available on the Steam Store and download the latest Goldberg Emulator release.)_
 * Click on the "Select..." button on the top right and select the `steam_api.dll` or `steam_api64.dll` file in the game folder.
 * Enter the name of the game and click on the "Find ID..." button.
@@ -30,7 +30,6 @@ While the most used options are available right now, I am planning to support al
 * Subscribed Groups
 * Mods (Steam Workshop)
 * Inventory and Items
-* ~~Achievements~~
 * Stats, Leaderboards
 * Controller (Steam Input)
 
