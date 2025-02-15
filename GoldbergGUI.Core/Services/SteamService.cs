@@ -2,6 +2,7 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using GoldbergGUI.Core.Models;
 using GoldbergGUI.Core.Utils;
+using GoldbergGUI.Core.ViewModels;
 using MvvmCross.Logging;
 using NinjaNye.SearchExtensions;
 using SQLite;
@@ -19,7 +20,7 @@ namespace GoldbergGUI.Core.Services
     // gets info from steam api
     public interface ISteamService
     {
-        public Task Initialize(IMvxLog log);
+        public Task Initialize(IMvxLog log, GoldbergGlobalConfiguration globalConfiguration);
         public Task<IEnumerable<SteamApp>> GetListOfAppsByName(string name);
         public Task<SteamApp> GetAppByName(string name);
         public Task<SteamApp> GetAppById(int appid);
@@ -59,8 +60,8 @@ namespace GoldbergGUI.Core.Services
                 File.WriteAllText(_keyPath, apiKey);
                 return apiKey;
             }
-            
-        } 
+
+        }
         // ReSharper disable StringLiteralTypo
         private readonly Dictionary<string, SteamCache> _caches =
             new Dictionary<string, SteamCache>
@@ -101,10 +102,10 @@ namespace GoldbergGUI.Core.Services
         private const string GameSchemaUrl = "https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/";
 
         private IMvxLog _log;
-
+        private string _language;
         private SQLiteAsyncConnection _db;
 
-        public async Task Initialize(IMvxLog log)
+        public async Task Initialize(IMvxLog log, GoldbergGlobalConfiguration globalConfiguration)
         {
             static SteamApps DeserializeSteamApps(Type type, string cacheString)
             {
@@ -114,6 +115,7 @@ namespace GoldbergGUI.Core.Services
             }
 
             _log = log;
+            _language = globalConfiguration.Language;
             _db = new SQLiteAsyncConnection(Database);
             //_db.CreateTable<SteamApp>();
             await _db.CreateTableAsync<SteamApp>()
@@ -198,7 +200,8 @@ namespace GoldbergGUI.Core.Services
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
-            var apiUrl = $"{GameSchemaUrl}?key={Key()}&appid={steamApp.AppId}&l=en";
+
+            var apiUrl = $"{GameSchemaUrl}?key={Key()}&appid={steamApp.AppId}&l={_language}";
 
             var response = await client.GetAsync(apiUrl);
             var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
