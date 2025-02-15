@@ -77,14 +77,16 @@ namespace GoldbergGUI.Core.ViewModels
                 {
                     SteamLanguages = new ObservableCollection<string>(_goldberg.Languages());
                     ResetForm();
-                    await _steam.Initialize(_logProvider.GetLogFor<SteamService>()).ConfigureAwait(false);
-                    await _goldberg.Initialize(_logProvider.GetLogFor<GoldbergService>()).ConfigureAwait(false);
-                    var globalConfiguration =
-                        await _goldberg.GetGlobalSettings().ConfigureAwait(false);
+                    var steamLog = _logProvider.GetLogFor<SteamService>();
+                    var goldbergLog = _logProvider.GetLogFor<GoldbergService>();
+                    await _goldberg.Initialize(goldbergLog).ConfigureAwait(false);
+                    var globalConfiguration = await _goldberg.GetGlobalSettings().ConfigureAwait(false);
+
                     AccountName = globalConfiguration.AccountName;
                     SteamId = globalConfiguration.UserSteamId;
                     SelectedLanguage = globalConfiguration.Language;
                     Experimental = globalConfiguration.Experimental;
+                    await _steam.Initialize(steamLog, globalConfiguration).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
