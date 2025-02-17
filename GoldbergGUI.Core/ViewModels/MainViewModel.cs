@@ -110,7 +110,7 @@ namespace GoldbergGUI.Core.ViewModels
         public string DllPath
         {
             get => _dllPath;
-            private set
+            set
             {
                 _dllPath = value;
                 RaisePropertyChanged(() => DllPath);
@@ -310,28 +310,33 @@ namespace GoldbergGUI.Core.ViewModels
 
         // COMMANDS //
 
-        public IMvxCommand OpenFileCommand => new MvxAsyncCommand(OpenFile);
+        public IMvxCommand OpenFileCommand => new MvxAsyncCommand(() => OpenFile());
 
-        private async Task OpenFile()
+        public async Task OpenFile(string filePath = null)
         {
             MainWindowEnabled = false;
             StatusText = "Please choose a file...";
-            var dialog = new OpenFileDialog
+
+            if (string.IsNullOrEmpty(filePath))
             {
-                Filter = "SteamAPI DLL|steam_api.dll;steam_api64.dll|" +
-                         "All files (*.*)|*.*",
-                Multiselect = false,
-                Title = "Select SteamAPI DLL..."
-            };
-            if (dialog.ShowDialog() != true)
-            {
-                MainWindowEnabled = true;
-                _log.Warn("File selection canceled.");
-                StatusText = "No file selected! Ready.";
-                return;
+                var dialog = new OpenFileDialog
+                {
+                    Filter = "SteamAPI DLL|steam_api.dll;steam_api64.dll|" +
+                                "All files (*.*)|*.*",
+                    Multiselect = false,
+                    Title = "Select SteamAPI DLL..."
+                };
+                if (dialog.ShowDialog() != true)
+                {
+                    MainWindowEnabled = true;
+                    _log.Warn("File selection canceled.");
+                    StatusText = "No file selected! Ready.";
+                    return;
+                }
+                filePath = dialog.FileName;
             }
 
-            DllPath = dialog.FileName;
+            DllPath = filePath;
             await ReadConfig().ConfigureAwait(false);
             if (!GoldbergApplied) await GetListOfDlc().ConfigureAwait(false);
             MainWindowEnabled = true;
@@ -622,7 +627,7 @@ namespace GoldbergGUI.Core.ViewModels
             AppId = config.AppId;
             Achievements = new ObservableCollection<Achievement>(config.Achievements);
             DLCs = new ObservableCollection<DlcApp>(config.DlcList);
-            ExperimentalNow = config.ExperimentalNow;
+            ExperimentalNow = Experimental;
             Offline = config.Offline;
             DisableNetworking = config.DisableNetworking;
             DisableOverlay = config.DisableOverlay;
