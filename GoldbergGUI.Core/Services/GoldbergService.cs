@@ -32,7 +32,7 @@ namespace GoldbergGUI.Core.Services
 
     // ReSharper disable once UnusedType.Global
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class GoldbergService : IGoldbergService
+    public partial class GoldbergService : IGoldbergService
     {
         private IMvxLog _log;
         private const string DefaultAccountName = "Mr_Goldberg";
@@ -55,8 +55,8 @@ namespace GoldbergGUI.Core.Services
             Path.Combine(GlobalSettingsPath, "settings/custom_broadcasts.txt");
 
         // ReSharper disable StringLiteralTypo
-        private readonly List<string> _interfaceNames = new List<string>
-        {
+        private readonly List<string> _interfaceNames =
+        [
             "SteamClient",
             "SteamGameServer",
             "SteamGameServerStats",
@@ -81,7 +81,7 @@ namespace GoldbergGUI.Core.Services
             "SteamController",
             "SteamMasterServerUpdater",
             "STEAMVIDEO_INTERFACE_V"
-        };
+        ];
 
         // Call Download
         // Get global settings
@@ -275,7 +275,7 @@ namespace GoldbergGUI.Core.Services
             {
                 _log.Info("Getting DLCs...");
                 var readAllLinesAsync = await File.ReadAllLinesAsync(dlcTxt).ConfigureAwait(false);
-                var expression = new Regex(@"(?<id>.*) *= *(?<name>.*)");
+                var expression = MyRegex();
                 // ReSharper disable once LoopCanBeConvertedToQuery
                 foreach (var line in readAllLinesAsync)
                 {
@@ -801,5 +801,8 @@ namespace GoldbergGUI.Core.Services
             await using var fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.None);
             await response.Content.CopyToAsync(fileStream);
         }
+
+        [GeneratedRegex(@"(?<id>.*) *= *(?<name>.*)")]
+        private static partial Regex MyRegex();
     }
 }
