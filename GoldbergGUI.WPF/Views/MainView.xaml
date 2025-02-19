@@ -102,7 +102,7 @@
                                     <CheckBox Content="Use Experimental (See Global Settings tab for permanent changes)" IsChecked="{Binding ExperimentalNow}" Height="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                                     <CheckBox Content="Offline" IsChecked="{Binding Offline, Mode=TwoWay}" Height="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                                     <CheckBox Content="Disable Networking" IsChecked="{Binding DisableNetworking, Mode=TwoWay}" Height="20" VerticalContentAlignment="Center"/>
-                                    <CheckBox Content="Disable Overlay" IsChecked="{Binding DisableOverlay, Mode=TwoWay}" Height="20" VerticalContentAlignment="Center" IsEnabled="False"/>
+                                    <CheckBox Content="Disable Overlay" IsChecked="{Binding DisableOverlay, Mode=TwoWay}" Height="20" VerticalContentAlignment="Center" />
                                 </StackPanel>
                             </TabItem>
                         </TabControl>

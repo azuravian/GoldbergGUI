@@ -9,6 +9,37 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Configs\configs.overlay.ini.template" />
+	  <None Remove="Configs\generate_emu_config-win.7z" />
+	  <None Remove="Media\fonts\Roboto-Medium.ttf" />
+	  <None Remove="Media\glyphs\button_a.png" />
+	  <None Remove="Media\glyphs\button_b.png" />
+	  <None Remove="Media\glyphs\button_x.png" />
+	  <None Remove="Media\glyphs\button_y.png" />
+	  <None Remove="Media\glyphs\shoulder_l.png" />
+	  <None Remove="Media\glyphs\shoulder_r.png" />
+	  <None Remove="Media\glyphs\stick_dpad_e.png" />
+	  <None Remove="Media\glyphs\stick_dpad_n.png" />
+	  <None Remove="Media\glyphs\stick_dpad_s.png" />
+	  <None Remove="Media\glyphs\stick_dpad_w.png" />
+	  <None Remove="Media\glyphs\stick_l_click.png" />
+	  <None Remove="Media\glyphs\stick_l_move.png" />
+	  <None Remove="Media\glyphs\stick_r_click.png" />
+	  <None Remove="Media\glyphs\stick_r_move.png" />
+	  <None Remove="Media\glyphs\trigger_l_click.png" />
+	  <None Remove="Media\glyphs\trigger_l_pull.png" />
+	  <None Remove="Media\glyphs\trigger_r_click.png" />
+	  <None Remove="Media\glyphs\trigger_r_pull.png" />
+	  <None Remove="Media\glyphs\xbox_button_dpad_e.png" />
+	  <None Remove="Media\glyphs\xbox_button_dpad_move.png" />
+	  <None Remove="Media\glyphs\xbox_button_dpad_n.png" />
+	  <None Remove="Media\glyphs\xbox_button_dpad_s.png" />
+	  <None Remove="Media\glyphs\xbox_button_dpad_w.png" />
+	  <None Remove="Media\glyphs\xbox_button_select.png" />
+	  <None Remove="Media\glyphs\xbox_button_start.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
 	    <WrapperTool>tlbimp</WrapperTool>
 	    <VersionMinor>4</VersionMinor>
@@ -18,13 +49,100 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Include="Configs\configs.overlay.ini.template">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Configs\generate_emu_config-win.7z">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\fonts\Roboto-Medium.ttf">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\button_a.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\button_b.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\button_x.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\button_y.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\shoulder_l.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\shoulder_r.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\stick_dpad_e.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\stick_dpad_n.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\stick_dpad_s.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\stick_dpad_w.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\stick_l_click.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\stick_l_move.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\stick_r_click.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\stick_r_move.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\trigger_l_click.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\trigger_l_pull.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\trigger_r_click.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\trigger_r_pull.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\xbox_button_dpad_e.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\xbox_button_dpad_move.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\xbox_button_dpad_n.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\xbox_button_dpad_s.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\xbox_button_dpad_w.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\xbox_button_select.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Media\glyphs\xbox_button_start.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="AngleSharp" Version="0.14.0" />
 		<PackageReference Include="MvvmCross" Version="7.1.2" />
 		<PackageReference Include="NinjaNye.SearchExtensions" Version="4.0.1" />
 		<PackageReference Include="PromptDialog" Version="1.0.0" />
 		<PackageReference Include="SharpCompress" Version="0.35.0" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.7.335" />
-		<PackageReference Include="SteamStorefrontAPI" Version="2.0.1.421" />
+		<PackageReference Include="SteamStorefrontAPI" Version="2.0.1.921" />
 	</ItemGroup>
 
 </Project>

@@ -487,7 +487,7 @@ namespace GoldbergGUI.Core.ViewModels
             if (!GetDllPathDir(out var dirPath)) return;
             MainWindowEnabled = false;
             StatusText = "Saving...";
-            await _goldberg.Save(dirPath, new GoldbergConfiguration
+            await _goldberg.Save(dirPath, globalConfiguration, new GoldbergConfiguration
             {
                 AppId = AppId,
                 Achievements = Achievements.ToList(),
