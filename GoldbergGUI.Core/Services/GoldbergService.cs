@@ -1,12 +1,13 @@
 using GoldbergGUI.Core.Models;
 using GoldbergGUI.Core.Utils;
 using MvvmCross.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using SharpCompress.Archives;
 using SharpCompress.Archives.SevenZip;
 using SharpCompress.Common;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -22,7 +23,7 @@ namespace GoldbergGUI.Core.Services
     {
         public Task<GoldbergGlobalConfiguration> Initialize(IMvxLog log);
         public Task<GoldbergConfiguration> Read(string path);
-        public Task Save(string path, GoldbergConfiguration configuration);
+        public Task Save(string path, GoldbergGlobalConfiguration globalconfig, GoldbergConfiguration configuration);
         public Task<GoldbergGlobalConfiguration> GetGlobalSettings();
         public Task SetGlobalSettings(GoldbergGlobalConfiguration configuration);
         public bool GoldbergApplied(string path);
@@ -50,6 +51,7 @@ namespace GoldbergGUI.Core.Services
         private readonly string _userSteamIdPath = Path.Combine(GlobalSettingsPath, "settings/user_steam_id.txt");
         private readonly string _languagePath = Path.Combine(GlobalSettingsPath, "settings/language.txt");
         private readonly string _experimentalPath = Path.Combine(GlobalSettingsPath, "settings/experimental.txt");
+        private readonly string _controllerPath = Path.Combine(GlobalSettingsPath, "settings/controller.txt");
 
         private readonly string _customBroadcastIpsPath =
             Path.Combine(GlobalSettingsPath, "settings/custom_broadcasts.txt");
@@ -231,6 +233,7 @@ namespace GoldbergGUI.Core.Services
         {
             _log.Info("Reading configuration...");
             var experimentalNow = false;
+            var processController = false;
             var appId = -1;
             var achievementList = new List<Achievement>();
             var dlcList = new List<DlcApp>();
@@ -267,6 +270,16 @@ namespace GoldbergGUI.Core.Services
             else
             {
                 _log.Info(@"""steam_settings/experimental.txt"" missing! Skipping...");
+            }
+
+            if (File.Exists(_controllerPath))
+            {
+                _log.Info("Getting controller settings...");
+                processController = File.ReadLines(_controllerPath).First().Trim() == "true";
+            }
+            else
+            {
+                _log.Info(@"""steam_settings/controller.txt"" missing! Skipping...");
             }
 
             var dlcTxt = Path.Combine(path, "steam_settings", "DLC.txt");
@@ -307,6 +320,57 @@ namespace GoldbergGUI.Core.Services
             {
                 _log.Info(@"""steam_settings/DLC.txt"" missing! Skipping...");
             }
+            var disableNetworking = false;
+            var offline = false;
+            var _mainconfigPath = Path.Combine(path, "steam_settings", "configs.main.ini");
+            if (File.Exists(_mainconfigPath))
+            {
+                _log.Info("Getting network settings...");
+                var mainconfig = await File.ReadAllLinesAsync(_mainconfigPath).ConfigureAwait(false);
+                foreach (var line in mainconfig)
+                {
+                    if (line.Contains("offline"))
+                    {
+                        if (line.Contains("1"))
+                        {
+                            offline = true;
+                        }
+                    }
+                    if (line.Contains("disable_networking"))
+                    {
+                        if (line.Contains("1"))
+                        {
+                            disableNetworking = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _log.Info(@"""steam_settings/configs.main.ini"" missing! Skipping...");
+            }
+
+            var _overlayconfigPath = Path.Combine(path, "steam_settings", "configs.overlay.ini");
+            var disableOverlay = false;
+            if (File.Exists(_overlayconfigPath))
+            {
+                _log.Info("Getting overlay settings...");
+                var overlayconfig = await File.ReadAllLinesAsync(_overlayconfigPath).ConfigureAwait(false);
+                foreach (var line in overlayconfig)
+                {
+                    if (line.Contains("enable_experimental_overlay"))
+                    {
+                        if (line.Contains("0"))
+                        {
+                            disableOverlay = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _log.Info(@"""steam_settings/configs.overlay.ini"" missing! Skipping...");
+            }
 
             return new GoldbergConfiguration
             {
@@ -314,9 +378,10 @@ namespace GoldbergGUI.Core.Services
                 Achievements = achievementList,
                 DlcList = dlcList,
                 ExperimentalNow = experimentalNow,
-                Offline = File.Exists(Path.Combine(path, "steam_settings", "offline.txt")),
-                DisableNetworking = File.Exists(Path.Combine(path, "steam_settings", "disable_networking.txt")),
-                DisableOverlay = File.Exists(Path.Combine(path, "steam_settings", "disable_overlay.txt"))
+                ProcessController = processController,
+                Offline = offline,
+                DisableNetworking = disableNetworking,
+                DisableOverlay = disableOverlay
             };
         }
 
@@ -324,8 +389,35 @@ namespace GoldbergGUI.Core.Services
         // If not, rename current SteamAPI DLL to steam_api(64).dll.backup
         // Copy Goldberg DLL to path
         // Save configuration files
-        public async Task Save(string path, GoldbergConfiguration c)
+        public async Task Save(string path, GoldbergGlobalConfiguration g, GoldbergConfiguration c)
         {
+            //Verify extra tools are available
+            if (c.ProcessController)
+            {
+                var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), "tools");
+                if (!Directory.Exists(toolsPath))
+                {
+                    Directory.CreateDirectory("tools");
+                }
+                _log.Info("Checking for generate_emu_config tool...");
+                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "tools", "generate_emu_config", "generate_emu_config.exe")))
+                {
+                    _log.Info("Extracting generate_emu_config tool...");
+                    var toolsArchivePath = Path.Combine(toolsPath, "generate_emu_config-win.7z");
+                    if (!File.Exists(toolsArchivePath))
+                    {
+                        File.Copy("Configs/generate_emu_config-win.7z", toolsArchivePath, true);
+                    }
+                    using (var archive = await Task.Run(() => SevenZipArchive.Open(toolsArchivePath)).ConfigureAwait(false))
+                    {
+                        archive.ExtractToDirectory(toolsPath);
+                    }
+                }
+                else { _log.Info("generate_emu_config tool found!"); }
+            }
+
+
+            // Save game settings
             _log.Info("Saving configuration...");
             // DLL setup
             _log.Info("Running DLL setup...");
@@ -354,6 +446,80 @@ namespace GoldbergGUI.Core.Services
             // create steam_appid.txt
             await File.WriteAllTextAsync(Path.Combine(path, "steam_appid.txt"), c.AppId.ToString())
                 .ConfigureAwait(false);
+
+            // Create main, overlay, and user config files
+            // Main
+            _log.Info("Setting up configs.main.ini");
+            var mainConfig = $"[main::general]\nnew_app_ticket = 1\ngc_token = 1\n[main::connectivity]\ndisable_networking = {(c.DisableNetworking ? 1 : 0)}\noffline = {(c.Offline ? 1 : 0)}";
+            await File.WriteAllTextAsync(Path.Combine(path, "steam_settings", "configs.main.ini"), mainConfig)
+                .ConfigureAwait(false);
+
+            // Overlay
+            _log.Info("Settings up configs.overlay.ini");
+            var overlayConfig = $"[overlay::general]\nenable_experimental_overlay={(c.DisableOverlay ? 0 : 1)}\n";
+            overlayConfig += "hook_delay_sec=5\nrenderer_detector_timeout_sec=35\ndisable_achievement_progress=0\n";
+            var overlayConfig2 = File.ReadAllText("Configs/configs.overlay.ini.template");
+            overlayConfig += overlayConfig2;
+            await File.WriteAllTextAsync(Path.Combine(path, "steam_settings", "configs.overlay.ini"), overlayConfig)
+                .ConfigureAwait(false);
+
+            // User
+            _log.Info("Setting up configs.user.ini");
+            var userConfig = $"[user::general]\naccount_name={g.AccountName}\naccount_steamid={g.UserSteamId}\nlanguage={g.Language}";
+            await File.WriteAllTextAsync(Path.Combine(path, "steam_settings", "configs.user.ini"), userConfig)
+                .ConfigureAwait(false);
+
+            // Copy other files
+            _log.Info("Copying other files...");
+            // Font
+            if (!Directory.Exists(Path.Combine(path, "steam_settings", "fonts")))
+            {
+                Directory.CreateDirectory(Path.Combine(path, "steam_settings", "fonts"));
+            }
+            File.Copy("Media/fonts/Roboto-Medium.ttf", Path.Combine(path, "steam_settings", "fonts", "Roboto-Medium.ttf"), true);
+
+            // Generate controller config
+            _log.Info("Generating controller config...");
+            try
+            {
+                using (Process p = new Process())
+                {
+                    p.StartInfo.FileName = Path.Combine(Directory.GetCurrentDirectory(), "tools", "generate_emu_config", "generate_emu_config.exe");
+                    p.StartInfo.Arguments = $"{c.AppId} -anon -skip_ach -skip_inv";
+                    p.StartInfo.UseShellExecute = false;
+                    p.StartInfo.CreateNoWindow = true;
+                    p.StartInfo.WorkingDirectory = Path.Combine(Directory.GetCurrentDirectory(), "tools", "generate_emu_config");
+                    p.StartInfo.Verb = "runas";
+                    p.Start();
+                    p.WaitForExit();
+                    int code = p.ExitCode;
+                }
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.ToString());
+            }
+
+            // Copy controller config
+            var newcontroller = Path.Combine(Directory.GetCurrentDirectory(), "tools", "generate_emu_config", "output", c.AppId.ToString(), "steam_settings", "controller");
+            if (Directory.Exists(newcontroller))
+            {
+                if (!Directory.Exists(Path.Combine(path, "steam_settings", "controller")))
+                {
+                    _log.Info("Creating controller folder...");
+                    Directory.CreateDirectory(Path.Combine(path, "steam_settings", "controller"));
+                }
+                _log.Info("Copying controller config...");
+                Copy(newcontroller, Path.Combine(path, "steam_settings", "controller"));
+
+                _log.Info("Copying glyphs...");
+                if (!Directory.Exists(Path.Combine(path, "steam_settings", "controller", "glyphs")))
+                {
+                    Directory.CreateDirectory(Path.Combine(path, "steam_settings", "controller", "glyphs"));
+                }
+                Copy("Media/glyphs", Path.Combine(path, "steam_settings", "controller", "glyphs"));
+            }
+
 
             // Achievements + Images
             if (c.Achievements.Count > 0)
@@ -416,7 +582,8 @@ namespace GoldbergGUI.Core.Services
                     if (!string.IsNullOrEmpty(x.AppPath))
                         appPathContent += $"{x.AppId}={x.AppPath}\n";
                 });
-                await File.WriteAllTextAsync(Path.Combine(path, "steam_settings", "DLC.txt"), dlcContent)
+                dlcContent = $"[app::dlcs]\nunlock_all=0\n{dlcContent.TrimEnd('\n')}";
+                await File.WriteAllTextAsync(Path.Combine(path, "steam_settings", "configs.app.ini"), dlcContent)
                     .ConfigureAwait(false);
 
                 /*if (!string.IsNullOrEmpty(depotContent))
@@ -437,54 +604,16 @@ namespace GoldbergGUI.Core.Services
                         File.Delete(Path.Combine(path, "steam_settings", "app_paths.txt"));
                 }
                 _log.Info("Saved DLC settings.");
+
             }
             else
             {
                 _log.Info("No DLC set! Removing DLC configuration files...");
-                if (File.Exists(Path.Combine(path, "steam_settings", "DLC.txt")))
-                    File.Delete(Path.Combine(path, "steam_settings", "DLC.txt"));
+                if (File.Exists(Path.Combine(path, "steam_settings", "configs.app.ini")))
+                    File.Delete(Path.Combine(path, "steam_settings", "configs.app.ini"));
                 if (File.Exists(Path.Combine(path, "steam_settings", "app_paths.txt")))
                     File.Delete(Path.Combine(path, "steam_settings", "app_paths.txt"));
                 _log.Info("Removed DLC configuration files.");
-            }
-
-            // Offline
-            if (c.Offline)
-            {
-                _log.Info("Create offline.txt");
-                await File.Create(Path.Combine(path, "steam_settings", "offline.txt")).DisposeAsync()
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                _log.Info("Delete offline.txt if it exists");
-                File.Delete(Path.Combine(path, "steam_settings", "offline.txt"));
-            }
-
-            // Disable Networking
-            if (c.DisableNetworking)
-            {
-                _log.Info("Create disable_networking.txt");
-                await File.Create(Path.Combine(path, "steam_settings", "disable_networking.txt")).DisposeAsync()
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                _log.Info("Delete disable_networking.txt if it exists");
-                File.Delete(Path.Combine(path, "steam_settings", "disable_networking.txt"));
-            }
-
-            // Disable Overlay
-            if (c.DisableOverlay)
-            {
-                _log.Info("Create disable_overlay.txt");
-                await File.Create(Path.Combine(path, "steam_settings", "disable_overlay.txt")).DisposeAsync()
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                _log.Info("Delete disable_overlay.txt if it exists");
-                File.Delete(Path.Combine(path, "steam_settings", "disable_overlay.txt"));
             }
         }
 
@@ -767,6 +896,24 @@ namespace GoldbergGUI.Core.Services
             "turkish",
             "ukrainian"
         };
+
+        private void Copy(string source, string destination)
+        {
+            if (!Directory.Exists(destination))
+            {
+                Directory.CreateDirectory(destination);
+            }
+
+            foreach (var file in Directory.GetFiles(source))
+            {
+                File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), true);
+            }
+
+            foreach (var directory in Directory.GetDirectories(source))
+            {
+                Copy(directory, Path.Combine(destination, Path.GetFileName(directory)));
+            }
+        }
 
         private static bool FindInterfaces(ref HashSet<string> result, string dllContent, Regex regex)
         {

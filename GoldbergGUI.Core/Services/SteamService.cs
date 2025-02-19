@@ -207,11 +207,16 @@ namespace GoldbergGUI.Core.Services
             var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             var jsonResponse = JsonDocument.Parse(responseBody);
-            var achievementData = jsonResponse.RootElement.GetProperty("game")
-                .GetProperty("availableGameStats")
-                .GetProperty("achievements");
-
-            achievementList = JsonSerializer.Deserialize<List<Achievement>>(achievementData.GetRawText());
+            if (jsonResponse.RootElement.TryGetProperty("game", out JsonElement gameElement) &&
+                gameElement.TryGetProperty("availableGameStats", out JsonElement statsElement) &&
+                statsElement.TryGetProperty("achievements", out JsonElement achievementData))
+            {
+                achievementList = JsonSerializer.Deserialize<List<Achievement>>(achievementData.GetRawText());
+            }
+            else
+            {
+                _log.Error("Required properties not found in the JSON response.");
+            }
             return achievementList;
         }
 

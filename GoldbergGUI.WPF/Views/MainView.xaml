@@ -100,9 +100,10 @@
                                 <StackPanel Margin="10,10,10,10">
                                     <Button Content="_Generate steam__interfaces.txt" IsEnabled="{Binding SteamInterfacesTxtExists, UpdateSourceTrigger=PropertyChanged}" Command="{Binding GenerateSteamInterfacesCommand}" Height="20" Margin="0,0,0,5" />
                                     <CheckBox Content="Use Experimental (See Global Settings tab for permanent changes)" IsChecked="{Binding ExperimentalNow}" Height="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                                    <CheckBox Content="Generate Controller Layout" IsChecked="{Binding ProcessController}" Height="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                                     <CheckBox Content="Offline" IsChecked="{Binding Offline, Mode=TwoWay}" Height="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
                                     <CheckBox Content="Disable Networking" IsChecked="{Binding DisableNetworking, Mode=TwoWay}" Height="20" VerticalContentAlignment="Center"/>
-                                    <CheckBox Content="Disable Overlay" IsChecked="{Binding DisableOverlay, Mode=TwoWay}" Height="20" VerticalContentAlignment="Center" IsEnabled="False"/>
+                                    <CheckBox Content="Disable Overlay" IsChecked="{Binding DisableOverlay, Mode=TwoWay}" Height="20" VerticalContentAlignment="Center" />
                                 </StackPanel>
                             </TabItem>
                         </TabControl>
