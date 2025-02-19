@@ -1,19 +1,18 @@
 using GoldbergGUI.Core.Models;
 using GoldbergGUI.Core.Utils;
 using MvvmCross.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using SharpCompress.Archives;
 using SharpCompress.Archives.SevenZip;
 using SharpCompress.Common;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Configuration.Internal;
-using System.Diagnostics;
 
 namespace GoldbergGUI.Core.Services
 {
@@ -52,6 +51,7 @@ namespace GoldbergGUI.Core.Services
         private readonly string _userSteamIdPath = Path.Combine(GlobalSettingsPath, "settings/user_steam_id.txt");
         private readonly string _languagePath = Path.Combine(GlobalSettingsPath, "settings/language.txt");
         private readonly string _experimentalPath = Path.Combine(GlobalSettingsPath, "settings/experimental.txt");
+        private readonly string _controllerPath = Path.Combine(GlobalSettingsPath, "settings/controller.txt");
 
         private readonly string _customBroadcastIpsPath =
             Path.Combine(GlobalSettingsPath, "settings/custom_broadcasts.txt");
@@ -233,6 +233,7 @@ namespace GoldbergGUI.Core.Services
         {
             _log.Info("Reading configuration...");
             var experimentalNow = false;
+            var processController = false;
             var appId = -1;
             var achievementList = new List<Achievement>();
             var dlcList = new List<DlcApp>();
@@ -269,6 +270,16 @@ namespace GoldbergGUI.Core.Services
             else
             {
                 _log.Info(@"""steam_settings/experimental.txt"" missing! Skipping...");
+            }
+
+            if (File.Exists(_controllerPath))
+            {
+                _log.Info("Getting controller settings...");
+                processController = File.ReadLines(_controllerPath).First().Trim() == "true";
+            }
+            else
+            {
+                _log.Info(@"""steam_settings/controller.txt"" missing! Skipping...");
             }
 
             var dlcTxt = Path.Combine(path, "steam_settings", "DLC.txt");
@@ -309,6 +320,57 @@ namespace GoldbergGUI.Core.Services
             {
                 _log.Info(@"""steam_settings/DLC.txt"" missing! Skipping...");
             }
+            var disableNetworking = false;
+            var offline = false;
+            var _mainconfigPath = Path.Combine(path, "steam_settings", "configs.main.ini");
+            if (File.Exists(_mainconfigPath))
+            {
+                _log.Info("Getting network settings...");
+                var mainconfig = await File.ReadAllLinesAsync(_mainconfigPath).ConfigureAwait(false);
+                foreach (var line in mainconfig)
+                {
+                    if (line.Contains("offline"))
+                    {
+                        if (line.Contains("1"))
+                        {
+                            offline = true;
+                        }
+                    }
+                    if (line.Contains("disable_networking"))
+                    {
+                        if (line.Contains("1"))
+                        {
+                            disableNetworking = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _log.Info(@"""steam_settings/configs.main.ini"" missing! Skipping...");
+            }
+
+            var _overlayconfigPath = Path.Combine(path, "steam_settings", "configs.overlay.ini");
+            var disableOverlay = false;
+            if (File.Exists(_overlayconfigPath))
+            {
+                _log.Info("Getting overlay settings...");
+                var overlayconfig = await File.ReadAllLinesAsync(_overlayconfigPath).ConfigureAwait(false);
+                foreach (var line in overlayconfig)
+                {
+                    if (line.Contains("enable_experimental_overlay"))
+                    {
+                        if (line.Contains("0"))
+                        {
+                            disableOverlay = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _log.Info(@"""steam_settings/configs.overlay.ini"" missing! Skipping...");
+            }
 
             return new GoldbergConfiguration
             {
@@ -316,9 +378,10 @@ namespace GoldbergGUI.Core.Services
                 Achievements = achievementList,
                 DlcList = dlcList,
                 ExperimentalNow = experimentalNow,
-                Offline = File.Exists(Path.Combine(path, "steam_settings", "offline.txt")),
-                DisableNetworking = File.Exists(Path.Combine(path, "steam_settings", "disable_networking.txt")),
-                DisableOverlay = File.Exists(Path.Combine(path, "steam_settings", "disable_overlay.txt"))
+                ProcessController = processController,
+                Offline = offline,
+                DisableNetworking = disableNetworking,
+                DisableOverlay = disableOverlay
             };
         }
 
@@ -328,24 +391,31 @@ namespace GoldbergGUI.Core.Services
         // Save configuration files
         public async Task Save(string path, GoldbergGlobalConfiguration g, GoldbergConfiguration c)
         {
-            // Verify extra tools are available
-            var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), "tools");
-            if (!Directory.Exists(toolsPath))
+            //Verify extra tools are available
+            if (c.ProcessController)
             {
-                Directory.CreateDirectory("tools");
-            }
-            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "tools", "generate_emu_config", "generate_emu_config.exe")))
-            {
-                var toolsArchivePath = Path.Combine(toolsPath, "generate_emu_config-win.7z");
-                if (!File.Exists(toolsArchivePath))
+                var toolsPath = Path.Combine(Directory.GetCurrentDirectory(), "tools");
+                if (!Directory.Exists(toolsPath))
                 {
-                    File.Copy("Configs/generate_emu_config-win.7z", toolsArchivePath, true);
+                    Directory.CreateDirectory("tools");
                 }
-                using (var archive = await Task.Run(() => SevenZipArchive.Open(toolsArchivePath)).ConfigureAwait(false))
+                _log.Info("Checking for generate_emu_config tool...");
+                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "tools", "generate_emu_config", "generate_emu_config.exe")))
                 {
-                    archive.ExtractToDirectory(toolsPath);
+                    _log.Info("Extracting generate_emu_config tool...");
+                    var toolsArchivePath = Path.Combine(toolsPath, "generate_emu_config-win.7z");
+                    if (!File.Exists(toolsArchivePath))
+                    {
+                        File.Copy("Configs/generate_emu_config-win.7z", toolsArchivePath, true);
+                    }
+                    using (var archive = await Task.Run(() => SevenZipArchive.Open(toolsArchivePath)).ConfigureAwait(false))
+                    {
+                        archive.ExtractToDirectory(toolsPath);
+                    }
                 }
+                else { _log.Info("generate_emu_config tool found!"); }
             }
+
 
             // Save game settings
             _log.Info("Saving configuration...");
@@ -409,6 +479,7 @@ namespace GoldbergGUI.Core.Services
             File.Copy("Media/fonts/Roboto-Medium.ttf", Path.Combine(path, "steam_settings", "fonts", "Roboto-Medium.ttf"), true);
 
             // Generate controller config
+            _log.Info("Generating controller config...");
             try
             {
                 using (Process p = new Process())
@@ -430,13 +501,18 @@ namespace GoldbergGUI.Core.Services
             }
 
             // Copy controller config
-            if (!Directory.Exists(Path.Combine(path, "steam_settings", "controller")))
-            {
-                Directory.CreateDirectory(Path.Combine(path, "steam_settings", "controller"));
-            }
             var newcontroller = Path.Combine(Directory.GetCurrentDirectory(), "tools", "generate_emu_config", "output", c.AppId.ToString(), "steam_settings", "controller");
-            if (Directory.Exists(newcontroller)){
+            if (Directory.Exists(newcontroller))
+            {
+                if (!Directory.Exists(Path.Combine(path, "steam_settings", "controller")))
+                {
+                    _log.Info("Creating controller folder...");
+                    Directory.CreateDirectory(Path.Combine(path, "steam_settings", "controller"));
+                }
+                _log.Info("Copying controller config...");
                 Copy(newcontroller, Path.Combine(path, "steam_settings", "controller"));
+
+                _log.Info("Copying glyphs...");
                 if (!Directory.Exists(Path.Combine(path, "steam_settings", "controller", "glyphs")))
                 {
                     Directory.CreateDirectory(Path.Combine(path, "steam_settings", "controller", "glyphs"));

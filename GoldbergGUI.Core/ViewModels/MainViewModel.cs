@@ -37,6 +37,7 @@ namespace GoldbergGUI.Core.ViewModels
         private long _steamId;
         private bool _experimental;
         private bool _experimentalnow;
+        private bool _processcontroller;
         private bool _offline;
         private bool _disableNetworking;
         private bool _disableOverlay;
@@ -200,6 +201,16 @@ namespace GoldbergGUI.Core.ViewModels
             {
                 _experimentalnow = value;
                 RaisePropertyChanged(() => ExperimentalNow);
+            }
+        }
+
+        public bool ProcessController
+        {
+            get => _processcontroller;
+            set
+            {
+                _processcontroller = value;
+                RaisePropertyChanged(() => ProcessController);
             }
         }
 
@@ -494,6 +505,7 @@ namespace GoldbergGUI.Core.ViewModels
                 DlcList = DLCs.ToList(),
                 Offline = Offline,
                 ExperimentalNow = ExperimentalNow,
+                ProcessController = ProcessController,
                 DisableNetworking = DisableNetworking,
                 DisableOverlay = DisableOverlay
             }
@@ -628,6 +640,7 @@ namespace GoldbergGUI.Core.ViewModels
             Achievements = new ObservableCollection<Achievement>(config.Achievements);
             DLCs = new ObservableCollection<DlcApp>(config.DlcList);
             ExperimentalNow = Experimental;
+            ProcessController = config.ProcessController;
             Offline = config.Offline;
             DisableNetworking = config.DisableNetworking;
             DisableOverlay = config.DisableOverlay;

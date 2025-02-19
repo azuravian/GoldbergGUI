@@ -54,11 +54,14 @@ namespace GoldbergGUI.Core.Models
 
         public List<Stat> Stats { get; set; }
 
-        // Add controller setting here!
         /// <summary>
         /// Set experimental.
         /// </summary>
         public bool ExperimentalNow { get; set; }
+        /// <summary>
+        /// Get Controller config.
+        /// </summary>
+        public bool ProcessController { get; set; }
         /// <summary>
         /// Set offline mode.
         /// </summary>
@@ -71,6 +74,7 @@ namespace GoldbergGUI.Core.Models
         /// Disable overlay (experimental only).
         /// </summary>
         public bool DisableOverlay { get; set; }
+
 
         public GoldbergGlobalConfiguration OverwrittenGlobalConfiguration { get; set; }
     }
