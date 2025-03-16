@@ -386,7 +386,7 @@ namespace GoldbergGUI.Core.ViewModels
             }
             else
             {
-                var list = await _steam.GetListOfAppsByName(GameName).ConfigureAwait(false);
+                var list = await _steam.GetListOfAppsByName(GameName, SelectedLanguage).ConfigureAwait(false);
                 var steamApps = list as SteamApp[] ?? list.ToArray();
                 if (steamApps.Length == 1)
                 {
